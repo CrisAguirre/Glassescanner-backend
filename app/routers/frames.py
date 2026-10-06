@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from ..schemas import Frame, RecommendRequest, Recommendation
 from ..expert.rules import score_frame
 from ..expert.catalog import FRAMES
 from ..db import get_db
+from ..auth import require_admin
 
 router = APIRouter()
 
@@ -25,7 +26,7 @@ def _mem_frames(optica_id: str | None = None):
 async def list_frames(optica_id: str | None = None):
     return await _db_frames(optica_id) or _mem_frames(optica_id)
 
-@router.post("/frames", response_model=Frame, status_code=201)
+@router.post("/frames", response_model=Frame, status_code=201, dependencies=[Depends(require_admin)])
 async def create_frame(f: Frame):
     if any(x.id == f.id for x in FRAMES):
         raise HTTPException(409, f"Ya existe frame {f.id}")
@@ -38,7 +39,7 @@ async def create_frame(f: Frame):
             pass
     return f
 
-@router.put("/frames/{fid}", response_model=Frame)
+@router.put("/frames/{fid}", response_model=Frame, dependencies=[Depends(require_admin)])
 async def update_frame(fid: str, f: Frame):
     for i, x in enumerate(FRAMES):
         if x.id == fid:
@@ -52,7 +53,7 @@ async def update_frame(fid: str, f: Frame):
             return f
     raise HTTPException(404, f"Frame {fid} no existe")
 
-@router.delete("/frames/{fid}")
+@router.delete("/frames/{fid}", dependencies=[Depends(require_admin)])
 async def delete_frame(fid: str):
     global FRAMES
     if not any(x.id == fid for x in FRAMES):
@@ -72,7 +73,7 @@ async def recommend(req: RecommendRequest):
     targets = [f for f in pool if not req.frame_ids or f.id in req.frame_ids]
     return [score_frame(req.metrics, f) for f in targets]
 
-@router.post("/frames/seed")
+@router.post("/frames/seed", dependencies=[Depends(require_admin)])
 async def seed_frames():
     """Carga frames_seed.json a Mongo (requiere MONGODB_URI)."""
     import json, pathlib

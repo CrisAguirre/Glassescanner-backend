@@ -49,3 +49,5 @@ class FeedbackIn(BaseModel):
     verdict: Verdict = "compatible"
     helpful: int = Field(ge=1, le=5, default=5)
     comment: Optional[str] = None
+    optica_id: Optional[str] = None
+    caso_n: Optional[int] = None

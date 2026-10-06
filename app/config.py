@@ -8,5 +8,6 @@ class Settings(BaseSettings):
     STORE_PHOTOS: bool = False
     MONGODB_URI: str = "mongodb://localhost:27017/glassescanner"
     MONGODB_DB: str = "glassescanner"
+    ADMIN_KEY: str = "cambia-esta-clave"  # header X-Admin-Key para mutaciones
 
 settings = Settings()
