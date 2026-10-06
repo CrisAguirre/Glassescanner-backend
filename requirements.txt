@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.12
+mediapipe==0.10.14
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+scikit-learn==1.5.0
+pydantic==2.8.0
+pydantic-settings==2.4.0
+motor==3.5.1
+pytest==8.3.0
+ruff==0.5.0

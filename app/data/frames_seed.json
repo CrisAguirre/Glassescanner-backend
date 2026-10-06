@@ -1,0 +1,14 @@
+[
+  {"id": "F01", "nombre": "Ejecutivo Rectangular", "forma": "rectangular", "A_mm": 52, "B_mm": 36, "D_mm": 18, "patilla_mm": 140, "ancho_total_mm": 140, "material": "acetato", "color": "negro"},
+  {"id": "F02", "nombre": "Urbano Rectangular Carey", "forma": "rectangular", "A_mm": 54, "B_mm": 37, "D_mm": 19, "patilla_mm": 140, "ancho_total_mm": 144, "material": "acetato", "color": "carey"},
+  {"id": "F03", "nombre": "Clásico Cuadrado", "forma": "cuadrado", "A_mm": 50, "B_mm": 38, "D_mm": 20, "patilla_mm": 140, "ancho_total_mm": 142, "material": "acetato", "color": "negro"},
+  {"id": "F04", "nombre": "Minimal Cuadrado Metal", "forma": "cuadrado", "A_mm": 51, "B_mm": 37, "D_mm": 19, "patilla_mm": 140, "ancho_total_mm": 141, "material": "metal", "color": "dorado"},
+  {"id": "F05", "nombre": "Vintage Redondo", "forma": "redondo", "A_mm": 48, "B_mm": 44, "D_mm": 20, "patilla_mm": 140, "ancho_total_mm": 138, "material": "acetato", "color": "negro"},
+  {"id": "F06", "nombre": "Suave Redondo Metal", "forma": "redondo", "A_mm": 47, "B_mm": 43, "D_mm": 21, "patilla_mm": 140, "ancho_total_mm": 137, "material": "metal", "color": "plateado"},
+  {"id": "F07", "nombre": "Esencial Oval", "forma": "oval", "A_mm": 51, "B_mm": 35, "D_mm": 18, "patilla_mm": 140, "ancho_total_mm": 139, "material": "acetato", "color": "negro"},
+  {"id": "F08", "nombre": "Aire Oval Rimless", "forma": "oval", "A_mm": 53, "B_mm": 34, "D_mm": 18, "patilla_mm": 140, "ancho_total_mm": 140, "material": "mixto", "color": "transparente"},
+  {"id": "F09", "nombre": "Aviador Clásico", "forma": "aviador", "A_mm": 55, "B_mm": 46, "D_mm": 18, "patilla_mm": 140, "ancho_total_mm": 143, "material": "metal", "color": "dorado-verde"},
+  {"id": "F10", "nombre": "Aviador Nocturno", "forma": "aviador", "A_mm": 56, "B_mm": 47, "D_mm": 19, "patilla_mm": 140, "ancho_total_mm": 145, "material": "metal", "color": "negro"},
+  {"id": "F11", "nombre": "Wayfarer Ícono", "forma": "wayfarer", "A_mm": 52, "B_mm": 40, "D_mm": 20, "patilla_mm": 140, "ancho_total_mm": 144, "material": "acetato", "color": "negro"},
+  {"id": "F12", "nombre": "Wayfarer Mate", "forma": "wayfarer", "A_mm": 53, "B_mm": 41, "D_mm": 21, "patilla_mm": 140, "ancho_total_mm": 146, "material": "acetato", "color": "mate"}
+]
