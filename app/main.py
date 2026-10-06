@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routers import analyze, frames
+from .routers import analyze, frames, feedback
 
 app = FastAPI(title="Glassescanner API", version="0.2.0")
 
@@ -20,3 +20,4 @@ def health():
 
 app.include_router(analyze.router)
 app.include_router(frames.router)
+app.include_router(feedback.router)

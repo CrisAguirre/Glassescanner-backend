@@ -38,3 +38,17 @@ def test_analyze_no_face_blank():
 def test_delete_photo():
     r = c.delete("/analyze/photo")
     assert r.status_code == 200 and r.json()["ok"] is True
+
+def test_crud_frames():
+    f = {"id": "FT99", "nombre": "Test", "forma": "oval", "A_mm": 50, "B_mm": 34, "D_mm": 18, "ancho_total_mm": 139}
+    assert c.post("/frames", json=f).status_code == 201
+    assert c.post("/frames", json=f).status_code == 409
+    f["nombre"] = "Test 2"
+    assert c.put("/frames/FT99", json=f).status_code == 200
+    assert c.delete("/frames/FT99").status_code == 200
+    assert c.delete("/frames/FT99").status_code == 404
+
+def test_feedback_stats():
+    assert c.post("/feedback", json={"face_shape": "oval", "frame_id": "F01", "verdict": "compatible", "helpful": 5}).status_code == 201
+    s = c.get("/feedback/stats").json()
+    assert s["n"] >= 1 and s["avg_helpful"] >= 1

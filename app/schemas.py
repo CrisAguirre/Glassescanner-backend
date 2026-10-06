@@ -41,3 +41,11 @@ class Recommendation(BaseModel):
 class RecommendRequest(BaseModel):
     metrics: FaceMetrics
     frame_ids: Optional[List[str]] = None
+    optica_id: Optional[str] = None
+
+class FeedbackIn(BaseModel):
+    face_shape: FaceShape = "oval"
+    frame_id: str = "F01"
+    verdict: Verdict = "compatible"
+    helpful: int = Field(ge=1, le=5, default=5)
+    comment: Optional[str] = None
