@@ -1,27 +1,54 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-import os
+import numpy as np
+from ..config import settings
 from ..schemas import FaceMetrics, Ratios
+from ..face.geometry import (
+    detect_face_box_bgr, metrics_from_box, try_mediapipe_landmarks,
+)
 
 router = APIRouter()
-
-MAX_MB = float(os.getenv("MAX_PHOTO_MB", "5"))
 
 @router.post("/analyze", response_model=FaceMetrics)
 async def analyze(photo: UploadFile = File(...)):
     data = await photo.read()
-    if len(data) > MAX_MB * 1024 * 1024:
-        raise HTTPException(400, f"Foto supera {MAX_MB} MB")
+    if len(data) > settings.MAX_PHOTO_MB * 1024 * 1024:
+        raise HTTPException(400, f"Foto supera {settings.MAX_PHOTO_MB} MB")
     if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
         raise HTTPException(400, "Formato válido: JPG/PNG/WebP")
-    # TODO S2: MediaPipe Python real (landmarks 468) + geometría en app/face/geometry.py.
-    # Stub con valores plausibles para no bloquear al front.
+    try:
+        import cv2
+        img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    except ImportError:
+        img = None
+    if img is None:
+        raise HTTPException(400, "No se pudo decodificar la imagen")
+    h, w = img.shape[:2]
+
+    # 1. MediaPipe real (Render Python 3.11 sí lo tiene)
+    m = try_mediapipe_landmarks(img)
+    if m:
+        return FaceMetrics(
+            face_detected=True,
+            face_shape=m["face_shape"],
+            symmetry_index=m["symmetry_index"],
+            ratios=Ratios(largo_ancho=m["largo_ancho"], frente_pomulo=0.95, mandibula_frente=0.9),
+            ipd_mm_est=m["ipd_mm_est"],
+            nose_bridge_mm_est=m["nose_bridge_mm_est"],
+            eyebrow_in_frame_zone=True,
+            warnings=m["warnings"],
+        )
+    # 2. Fallback OpenCV (dev local sin MediaPipe)
+    box = detect_face_box_bgr(img)
+    if box is None:
+        return FaceMetrics(face_detected=False, warnings=["No se detectó rostro frontal. Acércate a la luz y mira de frente."])
+    g = metrics_from_box(box, w, h)
     return FaceMetrics(
         face_detected=True,
-        face_shape="oval",
-        symmetry_index=87.5,
-        ratios=Ratios(largo_ancho=1.32, frente_pomulo=0.96, mandibula_frente=0.9),
-        ipd_mm_est=63.0,
-        nose_bridge_mm_est=18.0,
+        face_shape=g["face_shape"],
+        symmetry_index=g["symmetry_index"],
+        ratios=Ratios(largo_ancho=g["largo_ancho"], frente_pomulo=0.95, mandibula_frente=0.9),
+        ipd_mm_est=g["ipd_mm_est"],
+        nose_bridge_mm_est=g["nose_bridge_mm_est"],
         eyebrow_in_frame_zone=True,
-        warnings=["stub: conectar MediaPipe en S2"],
+        warnings=g["warnings"],
     )
