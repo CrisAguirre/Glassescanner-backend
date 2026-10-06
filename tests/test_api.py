@@ -34,3 +34,7 @@ def test_analyze_no_face_blank():
     r = c.post("/analyze", files={"photo": ("blank.jpg", buf.tobytes(), "image/jpeg")})
     assert r.status_code == 200
     assert r.json()["face_detected"] is False
+
+def test_delete_photo():
+    r = c.delete("/analyze/photo")
+    assert r.status_code == 200 and r.json()["ok"] is True

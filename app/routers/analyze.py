@@ -52,3 +52,8 @@ async def analyze(photo: UploadFile = File(...)):
         eyebrow_in_frame_zone=True,
         warnings=g["warnings"],
     )
+
+@router.delete("/analyze/photo")
+def delete_photo():
+    # STORE_PHOTOS=false: nada persiste; el borrado es local + confirmación legal.
+    return {"ok": True, "msg": "Foto descartada. No conservamos imágenes sin tu permiso (Ley 1581/2012)."}
