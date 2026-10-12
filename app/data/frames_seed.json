@@ -13,7 +13,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -38,7 +38,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -63,7 +63,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -88,7 +88,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -113,7 +113,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -139,7 +139,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -164,7 +164,7 @@
     "genero": "unisex",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -189,7 +189,7 @@
     "genero": "mujer",
     "precio_rango": "economico",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/rectangular.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -214,7 +214,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -239,7 +239,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -264,7 +264,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -289,7 +289,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -314,7 +314,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -340,7 +340,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -365,7 +365,7 @@
     "genero": "unisex",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -390,7 +390,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/cuadrado.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -415,7 +415,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -440,7 +440,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -465,7 +465,7 @@
     "genero": "unisex",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -490,7 +490,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -515,7 +515,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -540,7 +540,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -565,7 +565,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -590,7 +590,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/redondo.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -616,7 +616,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -641,7 +641,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -666,7 +666,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -691,7 +691,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -716,7 +716,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -741,7 +741,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -766,7 +766,7 @@
     "genero": "unisex",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -791,7 +791,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/oval.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -817,7 +817,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -842,7 +842,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -867,7 +867,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -892,7 +892,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -917,7 +917,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -942,7 +942,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -967,7 +967,7 @@
     "genero": "mujer",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -992,7 +992,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/aviador.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1018,7 +1018,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1043,7 +1043,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1068,7 +1068,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1093,7 +1093,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1118,7 +1118,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1143,7 +1143,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1168,7 +1168,7 @@
     "genero": "unisex",
     "precio_rango": "economico",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1193,7 +1193,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/wayfarer.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1219,7 +1219,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1244,7 +1244,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "OptiVision",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1269,7 +1269,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1294,7 +1294,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1319,7 +1319,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1344,7 +1344,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1369,7 +1369,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1394,7 +1394,7 @@
     "genero": "mujer",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/cat-eye.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1420,7 +1420,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1445,7 +1445,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Lumen",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1470,7 +1470,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Aria",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1495,7 +1495,7 @@
     "genero": "hombre",
     "precio_rango": "premium",
     "marca": "Vertex",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1520,7 +1520,7 @@
     "genero": "mujer",
     "precio_rango": "premium",
     "marca": "Nova",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1545,7 +1545,7 @@
     "genero": "unisex",
     "precio_rango": "premium",
     "marca": "Zenith",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1570,7 +1570,7 @@
     "genero": "hombre",
     "precio_rango": "medio",
     "marca": "Nexus",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
@@ -1596,7 +1596,7 @@
     "genero": "unisex",
     "precio_rango": "medio",
     "marca": "Prisma",
-    "imagen_url": null,
+    "imagen_url": "/frames/rimless.jpg",
     "tipo_lente": [
       "monofocal",
       "bifocal",
