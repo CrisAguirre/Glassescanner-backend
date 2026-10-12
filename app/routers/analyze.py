@@ -15,39 +15,36 @@ async def analyze(photo: UploadFile = File(...)):
         raise HTTPException(400, f"Foto supera {settings.MAX_PHOTO_MB} MB")
     if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
         raise HTTPException(400, "Formato válido: JPG/PNG/WebP")
-    cv2_ver, pil_ver, step = "missing", "missing", "init"
+    cv2_ver, pil_ver, cv2_err, pil_err, step = "missing", "missing", "", "", ""
+    img = None
+    # 1) PIL primero (puro Python+numpy, no depende de cv2 ni de libs del sistema)
     try:
-        import cv2
-        cv2_ver = getattr(cv2, "__version__", "?")
-        # .copy() = buffer escribible (frombuffer es read-only y falla en algunos builds de cv2 4.x)
-        buf = np.frombuffer(data, dtype=np.uint8).copy()
-        img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
-        step = "cv2 tried"
-    except ImportError:
-        img = None
-        step = "cv2 missing"
+        from PIL import Image
+        import io
+        pil_ver = getattr(Image, "__version__", "?")
+        pil_img = Image.open(io.BytesIO(data)).convert("RGB")
+        img = np.array(pil_img)[:, :, ::-1].copy()  # RGB->BGR sin cv2
+        step = "pil ok"
     except Exception as e:
-        img = None
-        step = f"cv2 exc {type(e).__name__}"
+        pil_err = f"{type(e).__name__}: {e}"[:160]
+        step = "pil fail"
+    # 2) cv2.imdecode como respaldo
     if img is None:
-        # Fallback PIL (cubre JPEG/WebP con particularidades que imdecode rechaza)
         try:
-            import cv2 as _cv2
-            from PIL import Image
-            import io
-            pil_ver = getattr(Image, "__version__", "?")
-            pil = Image.open(io.BytesIO(data)).convert("RGB")
-            img = _cv2.cvtColor(np.array(pil), _cv2.COLOR_RGB2BGR)
-            step += "+pil tried"
+            import cv2
+            cv2_ver = getattr(cv2, "__version__", "?")
+            buf = np.frombuffer(data, dtype=np.uint8).copy()
+            img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+            step += "+cv2 tried"
         except Exception as e:
-            img = None
-            step += f"+pil exc {type(e).__name__}"
+            cv2_err = f"{type(e).__name__}: {e}"[:200]
+            step += "+cv2 fail"
     if img is None:
         raise HTTPException(
             400,
             f"No se pudo decodificar la imagen [dbg len={len(data)} "
             f"ctype={photo.content_type} head={data[:12].hex()} "
-            f"cv2={cv2_ver} pil={pil_ver} step={step}]",
+            f"pil={pil_ver}/{pil_err} cv2={cv2_ver}/{cv2_err} step={step}]",
         )
     h, w = img.shape[:2]
 
