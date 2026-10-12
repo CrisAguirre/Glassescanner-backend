@@ -16,6 +16,7 @@ class FaceMetrics(BaseModel):
     ratios: Ratios = Ratios(largo_ancho=1.3, frente_pomulo=0.95, mandibula_frente=0.9)
     ipd_mm_est: float = 63.0
     nose_bridge_mm_est: float = 18.0
+    temporal_est: float = 138.0
     eyebrow_in_frame_zone: bool = True
     warnings: List[str] = []
 
@@ -30,6 +31,13 @@ class Frame(BaseModel):
     ancho_total_mm: float
     material: Literal["acetato", "metal", "mixto"] = "acetato"
     color: str = "negro"
+    genero: Literal["unisex", "hombre", "mujer"] = "unisex"
+    precio_rango: Literal["economico", "medio", "premium"] = "medio"
+    marca: str = "OptiVision"
+    imagen_url: Optional[str] = None
+    tipo_lente: List[str] = Field(default_factory=lambda: ["monofocal", "bifocal", "progresivo", "blue-cut", "fotocromático"])
+    estilo: Literal["casual", "formal", "vintage", "sport"] = "casual"
+    talla: Literal["S", "M", "L"] = "M"
     optica_id: Optional[str] = "seed"
 
 class Recommendation(BaseModel):
