@@ -7,23 +7,23 @@ from ..schemas import FaceMetrics, Frame, Recommendation
 # contraste: qué formas favorecen a cada rostro
 CONTRASTE = {
     "redondo": {"rectangular", "cuadrado", "wayfarer"},
-    "cuadrado": {"redondo", "oval", "aviador"},
-    "corazon": {"oval", "rimless", "redondo"},
-    "diamante": {"oval", "cat-eye", "rimless"},
-    "oblongo": {"cuadrado", "wayfarer", "redondo"},
-    "triangular": {"cat-eye", "aviador", "rectangular"},
+    "cuadrado": {"redondo", "oval", "aviador", "cat-eye"},
+    "corazon": {"oval", "rimless", "redondo", "aviador"},
+    "diamante": {"oval", "cat-eye", "rimless", "redondo"},
+    "oblongo": {"cuadrado", "wayfarer", "redondo", "aviador"},
+    "triangular": {"cat-eye", "aviador", "rectangular", "wayfarer"},
     "oval": {"rectangular", "redondo", "cuadrado", "oval", "aviador", "wayfarer", "cat-eye", "rimless"},
 }
 
 def score_frame(m: FaceMetrics, f: Frame) -> Recommendation:
     reasons = []
-    # 1. Proporción (40): ancho marco vs temporal estimado (temporal ≈ 138 mm stub; S2 lo deriva de landmarks)
-    temporal_est = 138.0
+    # 1. Proporción (40): ancho marco vs temporal facial medido/estimado
+    temporal_est = getattr(m, "temporal_est", 138.0) or 138.0
     diff = abs(f.ancho_total_mm - temporal_est)
     prop = max(0, 40 - diff * 2)  # -2 pts por mm
     reasons.append(
         f"Ancho marco {f.ancho_total_mm:.0f} mm vs rostro ~{temporal_est:.0f} mm (dif {diff:.0f} mm): "
-        + ("proporción ideal." if diff <= 10 else "aceptable." if diff <= 20 else "desproporcionado.")
+        + ("proporción ideal." if diff <= 8 else "ajuste adecuado." if diff <= 16 else "desproporcionado.")
     )
     # 2. Contraste (30)
     cont = 30 if f.forma in CONTRASTE.get(m.face_shape, set()) else 12

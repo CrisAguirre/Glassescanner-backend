@@ -22,18 +22,41 @@ def symmetry_index(pairs, width):
     return round(max(0, 100 - sum(errs) / len(errs) * 220), 1)
 
 def classify_face(largo, ancho, frente, pomulo, mandibula):
-    if largo / max(ancho, 1) > 1.45:
+    """Clasificación facial morfométrica calibrada (7 formas clásicas).
+    largo: altura facial (trichion a menton)
+    ancho: ancho bizigomático / temporal
+    frente: anchura a nivel de frente/sienes superiores
+    pomulo: anchura máxima pómulos
+    mandibula: anchura gonial de mandíbula
+    """
+    ratio_la = largo / max(ancho, 1e-6)
+    r_mand_pom = mandibula / max(pomulo, 1e-6)
+    r_mand_frente = mandibula / max(frente, 1e-6)
+
+    # 1. Rostro marcadamente alargado
+    if ratio_la > 1.45:
         return "oblongo"
-    if abs(ancho - largo) / largo < 0.08 and mandibula / frente > 0.92:
-        return "redondo" if mandibula / frente > 0.97 else "cuadrado"
-    if frente > pomulo * 1.06 and mandibula < pomulo * 0.85:
-        return "corazon"
-    if pomulo > frente * 1.06 and pomulo > mandibula * 1.06:
-        return "diamante"
-    if mandibula > frente * 1.05:
+
+    # 2. Rostros anchos / cortos (largo similar a ancho)
+    if ratio_la < 1.18:
+        # Si la mandíbula es angular y ancha comparada con pómulos o frente -> cuadrado
+        if r_mand_pom > 0.88 or r_mand_frente > 0.92:
+            return "cuadrado"
+        return "redondo"
+
+    # 3. Base ancha: mandíbula notablemente más ancha que frente
+    if mandibula > frente * 1.08:
         return "triangular"
-    if 1.25 <= largo / max(ancho, 1) <= 1.45:
-        return "oval"
+
+    # 4. Corazón / Triángulo invertido: frente amplia y barbilla afilada
+    if frente > mandibula * 1.18 and frente >= pomulo * 0.94:
+        return "corazon"
+
+    # 5. Diamante: pómulos son claramente la parte más ancha; frente y mandíbula estrechas
+    if pomulo > frente * 1.12 and pomulo > mandibula * 1.12:
+        return "diamante"
+
+    # 6. Oval: proporciones armónicas y equilibradas
     return "oval"
 
 def detect_face_box_bgr(img_bgr):
@@ -57,15 +80,18 @@ def detect_face_box_bgr(img_bgr):
 def metrics_from_box(box, img_w, img_h):
     """Estimación gruesa desde bounding box (fallback). S2-real usa malla en Render."""
     x, y, w, h = [float(v) for v in box]
-    largo, ancho = h / max(img_h, 1), w / max(img_w, 1)
-    shape = classify_face(h, w, w * 0.92, w, w * 0.88)
-    # IPD ~ 38% del ancho de cara; puente ~ 13% del ancho
+    largo, ancho = h, w
+    shape = classify_face(h, w, w * 0.92, w, w * 0.86)
     return {
         "face_shape": shape,
         "symmetry_index": 82.0,
-        "largo_ancho": round(h / max(w, 1), 2),
+        "largo_ancho": round(h / max(w, 1e-6), 2),
+        "frente_pomulo": 0.92,
+        "mandibula_frente": 0.93,
+        "temporal_est": 138.0,
         "ipd_mm_est": 63.0,
         "nose_bridge_mm_est": 18.0,
+        "eyebrow_in_frame_zone": True,
         "warnings": ["modo fallback (sin MediaPipe local): métricas gruesas; en Render se usa malla 478 pts"],
     }
 
@@ -96,19 +122,43 @@ def try_mediapipe_landmarks(img_bgr):
         (P(93), P(323), x_mid), (P(61), P(291), x_mid),
     ]
     sym = symmetry_index([(a, b, m) for a, b, m in pairs], W)
-    largo = _dist(P(10), P(152)); ancho = W
-    frente = _dist(P(234), P(454)) * 0.92
-    pom = _dist(P(93), P(323)) or ancho
-    man = _dist(P(172), P(397)) if len(lm) > 397 else pom * 0.9
+    largo = _dist(P(10), P(152))
+    ancho = W
+    frente = _dist(P(103), P(332)) if len(lm) > 332 else W * 0.90
+    pom = _dist(P(123), P(352)) if len(lm) > 352 else W
+    man = _dist(P(172), P(397)) if len(lm) > 397 else pom * 0.85
     shape = classify_face(largo, ancho, frente, pom, man)
-    ipd = _dist(P(468), P(473)) if len(lm) > 473 else _dist(P(33), P(263)) * 0.45
-    # escala: cara adulta ~142 mm de sien a sien
-    px2mm = 142.0 / max(W * w, 1) * w if W < 2 else 1.0
+
+    # Medición de IPD
+    if len(lm) > 473:
+        ipd_px = _dist(P(468), P(473)) * w
+    else:
+        ipd_px = _dist(P(33), P(263)) * w * 0.5
+
+    px2mm = 63.0 / ipd_px if ipd_px > 15 else (142.0 / max(W * w, 1))
+
+    temporal_est = round(max(122.0, min(156.0, W * w * px2mm)), 1)
+    ipd_mm_est = round(max(58.0, min(72.0, 63.0 * (temporal_est / 138.0))), 1)
+
+    # Puente nasal (cantos internos 133 a 362)
+    canthi_px = _dist(P(133), P(362)) * w
+    bridge_mm = round(max(15.0, min(22.0, canthi_px * px2mm * 0.52)), 1)
+
+    # Cejas vs Ojos
+    y_brow = (P(105)[1] + P(334)[1]) / 2.0 * h
+    y_eye = (P(168)[1] if len(lm) <= 473 else (P(468)[1] + P(473)[1]) / 2.0) * h
+    brow_clearance_mm = max(0.0, (y_eye - y_brow) * px2mm)
+    eyebrow_in_zone = 8.0 <= brow_clearance_mm <= 26.0
+
     return {
         "face_shape": shape,
         "symmetry_index": sym,
         "largo_ancho": round(largo / max(ancho, 1e-6), 2),
-        "ipd_mm_est": round(ipd * w * px2mm / w * w, 1) if False else round(63.0 * (0.9 + 0.2 * min(ancho, 1)), 1),
-        "nose_bridge_mm_est": 18.0,
+        "frente_pomulo": round(frente / max(pom, 1e-6), 2),
+        "mandibula_frente": round(man / max(frente, 1e-6), 2),
+        "temporal_est": temporal_est,
+        "ipd_mm_est": ipd_mm_est,
+        "nose_bridge_mm_est": bridge_mm,
+        "eyebrow_in_frame_zone": eyebrow_in_zone,
         "warnings": [],
     }

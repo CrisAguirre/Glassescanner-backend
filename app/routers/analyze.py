@@ -40,12 +40,7 @@ async def analyze(photo: UploadFile = File(...)):
             cv2_err = f"{type(e).__name__}: {e}"[:200]
             step += "+cv2 fail"
     if img is None:
-        raise HTTPException(
-            400,
-            f"No se pudo decodificar la imagen [dbg len={len(data)} "
-            f"ctype={photo.content_type} head={data[:12].hex()} "
-            f"pil={pil_ver}/{pil_err} cv2={cv2_ver}/{cv2_err} step={step}]",
-        )
+        raise HTTPException(400, "No se pudo decodificar la imagen")
     h, w = img.shape[:2]
 
     # 1. MediaPipe real (Render Python 3.11 sí lo tiene)
@@ -55,10 +50,15 @@ async def analyze(photo: UploadFile = File(...)):
             face_detected=True,
             face_shape=m["face_shape"],
             symmetry_index=m["symmetry_index"],
-            ratios=Ratios(largo_ancho=m["largo_ancho"], frente_pomulo=0.95, mandibula_frente=0.9),
+            ratios=Ratios(
+                largo_ancho=m["largo_ancho"],
+                frente_pomulo=m["frente_pomulo"],
+                mandibula_frente=m["mandibula_frente"],
+            ),
             ipd_mm_est=m["ipd_mm_est"],
             nose_bridge_mm_est=m["nose_bridge_mm_est"],
-            eyebrow_in_frame_zone=True,
+            temporal_est=m["temporal_est"],
+            eyebrow_in_frame_zone=m["eyebrow_in_frame_zone"],
             warnings=m["warnings"],
         )
     # 2. Fallback OpenCV (dev local sin MediaPipe)
@@ -70,10 +70,15 @@ async def analyze(photo: UploadFile = File(...)):
         face_detected=True,
         face_shape=g["face_shape"],
         symmetry_index=g["symmetry_index"],
-        ratios=Ratios(largo_ancho=g["largo_ancho"], frente_pomulo=0.95, mandibula_frente=0.9),
+        ratios=Ratios(
+            largo_ancho=g["largo_ancho"],
+            frente_pomulo=g["frente_pomulo"],
+            mandibula_frente=g["mandibula_frente"],
+        ),
         ipd_mm_est=g["ipd_mm_est"],
         nose_bridge_mm_est=g["nose_bridge_mm_est"],
-        eyebrow_in_frame_zone=True,
+        temporal_est=g["temporal_est"],
+        eyebrow_in_frame_zone=g["eyebrow_in_frame_zone"],
         warnings=g["warnings"],
     )
 

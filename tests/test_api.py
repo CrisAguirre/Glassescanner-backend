@@ -8,19 +8,32 @@ def test_health():
 
 def test_frames_seed():
     r = c.get("/frames")
-    assert r.status_code == 200 and len(r.json()) == 12
+    assert r.status_code == 200
+    frames = r.json()
+    assert len(frames) >= 64
+    f0 = frames[0]
+    assert "genero" in f0 and "precio_rango" in f0 and "marca" in f0
+    assert "tipo_lente" in f0 and "estilo" in f0 and "talla" in f0
 
 def test_recommend_scores_range():
-    r = c.post("/recommend", json={"metrics": {"face_detected": True}, "frame_ids": ["F01"]})
+    r = c.post("/recommend", json={"metrics": {"face_detected": True, "temporal_est": 140.0}, "frame_ids": ["F01"]})
     assert r.status_code == 200
-    assert 0 <= r.json()[0]["score"] <= 100
+    res = r.json()
+    assert len(res) == 1
+    assert 0 <= res[0]["score"] <= 100
+    assert res[0]["verdict"] in ("compatible", "parcial", "incompatible")
 
 def test_geometry_pure():
     from app.face.geometry import symmetry_index, classify_face
     s = symmetry_index([((0.3, 0.5), (0.7, 0.5), 0.5)], 0.4)
     assert 90 <= s <= 100
-    assert classify_face(170, 130, 125, 128, 110) == "oval"
-    assert classify_face(150, 145, 140, 142, 140) in ("redondo", "cuadrado")
+    assert classify_face(190, 125, 120, 125, 115) == "oblongo"
+    assert classify_face(140, 135, 130, 135, 110) == "redondo"
+    assert classify_face(142, 138, 134, 138, 130) == "cuadrado"
+    assert classify_face(170, 130, 110, 128, 124) == "triangular"
+    assert classify_face(165, 130, 135, 128, 98) == "corazon"
+    assert classify_face(170, 140, 118, 140, 110) == "diamante"
+    assert classify_face(175, 132, 126, 132, 112) == "oval"
 
 def test_analyze_rejects_bad_type():
     r = c.post("/analyze", files={"photo": ("x.txt", b"hola", "text/plain")})
