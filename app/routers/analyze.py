@@ -11,9 +11,10 @@ router = APIRouter()
 @router.post("/analyze", response_model=FaceMetrics)
 async def analyze(photo: UploadFile = File(...)):
     data = await photo.read()
-    if len(data) > settings.MAX_PHOTO_MB * 1024 * 1024:
-        raise HTTPException(400, f"Foto supera {settings.MAX_PHOTO_MB} MB")
-    if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
+    ctype = (photo.content_type or "").lower()
+    valid_types = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/pjpeg", "application/octet-stream"}
+    fname = (photo.filename or "").lower()
+    if ctype not in valid_types and not any(fname.endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp")):
         raise HTTPException(400, "Formato válido: JPG/PNG/WebP")
     cv2_ver, pil_ver, cv2_err, pil_err, step = "missing", "missing", "", "", ""
     img = None
