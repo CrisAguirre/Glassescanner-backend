@@ -17,9 +17,23 @@ async def analyze(photo: UploadFile = File(...)):
         raise HTTPException(400, "Formato válido: JPG/PNG/WebP")
     try:
         import cv2
-        img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+        # .copy() = buffer escribible (frombuffer es read-only y falla en algunos builds de cv2 4.x)
+        buf = np.frombuffer(data, dtype=np.uint8).copy()
+        img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
     except ImportError:
         img = None
+    except Exception:
+        img = None
+    if img is None:
+        # Fallback PIL (cubre JPEG/WebP con particularidades que imdecode rechaza)
+        try:
+            import cv2 as _cv2
+            from PIL import Image
+            import io
+            pil = Image.open(io.BytesIO(data)).convert("RGB")
+            img = _cv2.cvtColor(np.array(pil), _cv2.COLOR_RGB2BGR)
+        except Exception:
+            img = None
     if img is None:
         raise HTTPException(400, "No se pudo decodificar la imagen")
     h, w = img.shape[:2]
