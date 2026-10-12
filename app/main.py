@@ -5,10 +5,11 @@ from .routers import analyze, frames, feedback
 
 app = FastAPI(title="Glassescanner API", version="0.2.0")
 
-origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")]
+# Soporte total para Vercel prod, preview deploys y desarrollo local
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
