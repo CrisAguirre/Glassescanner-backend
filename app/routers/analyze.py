@@ -15,27 +15,40 @@ async def analyze(photo: UploadFile = File(...)):
         raise HTTPException(400, f"Foto supera {settings.MAX_PHOTO_MB} MB")
     if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
         raise HTTPException(400, "Formato válido: JPG/PNG/WebP")
+    cv2_ver, pil_ver, step = "missing", "missing", "init"
     try:
         import cv2
+        cv2_ver = getattr(cv2, "__version__", "?")
         # .copy() = buffer escribible (frombuffer es read-only y falla en algunos builds de cv2 4.x)
         buf = np.frombuffer(data, dtype=np.uint8).copy()
         img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+        step = "cv2 tried"
     except ImportError:
         img = None
-    except Exception:
+        step = "cv2 missing"
+    except Exception as e:
         img = None
+        step = f"cv2 exc {type(e).__name__}"
     if img is None:
         # Fallback PIL (cubre JPEG/WebP con particularidades que imdecode rechaza)
         try:
             import cv2 as _cv2
             from PIL import Image
             import io
+            pil_ver = getattr(Image, "__version__", "?")
             pil = Image.open(io.BytesIO(data)).convert("RGB")
             img = _cv2.cvtColor(np.array(pil), _cv2.COLOR_RGB2BGR)
-        except Exception:
+            step += "+pil tried"
+        except Exception as e:
             img = None
+            step += f"+pil exc {type(e).__name__}"
     if img is None:
-        raise HTTPException(400, "No se pudo decodificar la imagen")
+        raise HTTPException(
+            400,
+            f"No se pudo decodificar la imagen [dbg len={len(data)} "
+            f"ctype={photo.content_type} head={data[:12].hex()} "
+            f"cv2={cv2_ver} pil={pil_ver} step={step}]",
+        )
     h, w = img.shape[:2]
 
     # 1. MediaPipe real (Render Python 3.11 sí lo tiene)
