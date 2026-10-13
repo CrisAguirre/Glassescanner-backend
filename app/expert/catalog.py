@@ -4,6 +4,7 @@ from ..schemas import Frame
 
 _SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "frames_seed.json"
 
+
 def _load_frames() -> list[Frame]:
     if _SEED_PATH.exists():
         try:
@@ -13,5 +14,5 @@ def _load_frames() -> list[Frame]:
             pass
     return []
 
-FRAMES: list[Frame] = _load_frames()
 
+FRAMES: list[Frame] = _load_frames()

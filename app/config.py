@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
@@ -9,5 +10,6 @@ class Settings(BaseSettings):
     MONGODB_URI: str = "mongodb://localhost:27017/glassescanner"
     MONGODB_DB: str = "glassescanner"
     ADMIN_KEY: str = "cambia-esta-clave"  # header X-Admin-Key para mutaciones
+
 
 settings = Settings()

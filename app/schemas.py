@@ -1,13 +1,17 @@
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional
 
-FaceShape = Literal["oval", "redondo", "cuadrado", "corazon", "diamante", "oblongo", "triangular"]
+FaceShape = Literal[
+    "oval", "redondo", "cuadrado", "corazon", "diamante", "oblongo", "triangular"
+]
 Verdict = Literal["compatible", "parcial", "incompatible"]
+
 
 class Ratios(BaseModel):
     largo_ancho: float
     frente_pomulo: float
     mandibula_frente: float
+
 
 class FaceMetrics(BaseModel):
     face_detected: bool = True
@@ -20,10 +24,20 @@ class FaceMetrics(BaseModel):
     eyebrow_in_frame_zone: bool = True
     warnings: List[str] = []
 
+
 class Frame(BaseModel):
     id: str
     nombre: str
-    forma: Literal["rectangular", "cuadrado", "redondo", "oval", "aviador", "wayfarer", "cat-eye", "rimless"]
+    forma: Literal[
+        "rectangular",
+        "cuadrado",
+        "redondo",
+        "oval",
+        "aviador",
+        "wayfarer",
+        "cat-eye",
+        "rimless",
+    ]
     A_mm: float  # ancho lente
     B_mm: float  # alto lente
     D_mm: float  # puente
@@ -35,10 +49,19 @@ class Frame(BaseModel):
     precio_rango: Literal["economico", "medio", "premium"] = "medio"
     marca: str = "OptiVision"
     imagen_url: Optional[str] = None
-    tipo_lente: List[str] = Field(default_factory=lambda: ["monofocal", "bifocal", "progresivo", "blue-cut", "fotocromático"])
+    tipo_lente: List[str] = Field(
+        default_factory=lambda: [
+            "monofocal",
+            "bifocal",
+            "progresivo",
+            "blue-cut",
+            "fotocromático",
+        ]
+    )
     estilo: Literal["casual", "formal", "vintage", "sport"] = "casual"
     talla: Literal["S", "M", "L"] = "M"
     optica_id: Optional[str] = "seed"
+
 
 class Recommendation(BaseModel):
     frame_id: str
@@ -46,10 +69,12 @@ class Recommendation(BaseModel):
     verdict: Verdict
     reasons: List[str]
 
+
 class RecommendRequest(BaseModel):
     metrics: FaceMetrics
     frame_ids: Optional[List[str]] = None
     optica_id: Optional[str] = None
+
 
 class FeedbackIn(BaseModel):
     face_shape: FaceShape = "oval"

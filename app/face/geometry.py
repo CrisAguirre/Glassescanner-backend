@@ -5,10 +5,13 @@
 Índices MediaPipe FaceMesh (468): ojos 33/133/263/362, nariz 1/168, mentón 152,
 frente 10, sienes 234/454, pómulos 93/323.
 """
+
 import math
+
 
 def _dist(a, b):
     return math.hypot(a[0] - b[0], a[1] - b[1])
+
 
 def symmetry_index(pairs, width):
     """pairs: lista de ((x1,y1),(x2,y2)) espejados respecto a línea media x_mid.
@@ -20,6 +23,7 @@ def symmetry_index(pairs, width):
         d1, d2 = abs(x1 - x_mid), abs(x2 - x_mid)
         errs.append(abs(d1 - d2) / width + abs(y1 - y2) / width * 0.5)
     return round(max(0, 100 - sum(errs) / len(errs) * 220), 1)
+
 
 def classify_face(largo, ancho, frente, pomulo, mandibula):
     """Clasificación facial morfométrica calibrada (7 formas clásicas).
@@ -59,6 +63,7 @@ def classify_face(largo, ancho, frente, pomulo, mandibula):
     # 6. Oval: proporciones armónicas y equilibradas
     return "oval"
 
+
 def detect_face_box_bgr(img_bgr):
     """Fallback OpenCV Haar. Retorna (x,y,w,h) o None. No requiere MediaPipe."""
     try:
@@ -77,10 +82,10 @@ def detect_face_box_bgr(img_bgr):
         return None
     return max(faces, key=lambda b: b[2] * b[3])
 
+
 def metrics_from_box(box, img_w, img_h):
     """Estimación gruesa desde bounding box (fallback). S2-real usa malla en Render."""
-    x, y, w, h = [float(v) for v in box]
-    largo, ancho = h, w
+    _x, _y, w, h = [float(v) for v in box]
     shape = classify_face(h, w, w * 0.92, w, w * 0.86)
     return {
         "face_shape": shape,
@@ -92,8 +97,11 @@ def metrics_from_box(box, img_w, img_h):
         "ipd_mm_est": 63.0,
         "nose_bridge_mm_est": 18.0,
         "eyebrow_in_frame_zone": True,
-        "warnings": ["modo fallback (sin MediaPipe local): métricas gruesas; en Render se usa malla 478 pts"],
+        "warnings": [
+            "modo fallback (sin MediaPipe local): métricas gruesas; en Render se usa malla 478 pts"
+        ],
     }
+
 
 def try_mediapipe_landmarks(img_bgr):
     """Retorna dict de puntos nombrados o None si no hay MediaPipe/rostro."""
@@ -105,25 +113,34 @@ def try_mediapipe_landmarks(img_bgr):
     # img_bgr viene de PIL (RGB->BGR manual) o de cv2.imdecode; en ambos casos es ndarray HxWx3.
     try:
         import numpy as np
+
         rgb = img_bgr[:, :, ::-1]
         if not rgb.flags["C_CONTIGUOUS"]:
             rgb = np.ascontiguousarray(rgb)
     except Exception:
         return None
     with mp.solutions.face_mesh.FaceMesh(
-        static_image_mode=True, max_num_faces=1, refine_landmarks=True,
-        min_detection_confidence=0.5) as fm:
+        static_image_mode=True,
+        max_num_faces=1,
+        refine_landmarks=True,
+        min_detection_confidence=0.5,
+    ) as fm:
         res = fm.process(rgb)
     if not res.multi_face_landmarks:
         return None
     lm = res.multi_face_landmarks[0].landmark
-    P = lambda i: (lm[i].x, lm[i].y)
-    x_mid = (P(168)[0])
+
+    def P(i):
+        return (lm[i].x, lm[i].y)
+
+    x_mid = P(168)[0]
     h, w = img_bgr.shape[:2]
     W = _dist(P(234), P(454)) or 1e-6
     pairs = [
-        (P(33), P(263), x_mid), (P(133), P(362), x_mid),
-        (P(93), P(323), x_mid), (P(61), P(291), x_mid),
+        (P(33), P(263), x_mid),
+        (P(133), P(362), x_mid),
+        (P(93), P(323), x_mid),
+        (P(61), P(291), x_mid),
     ]
     sym = symmetry_index([(a, b, m) for a, b, m in pairs], W)
     largo = _dist(P(10), P(152))
