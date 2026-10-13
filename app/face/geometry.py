@@ -101,11 +101,15 @@ def try_mediapipe_landmarks(img_bgr):
         import mediapipe as mp
     except ImportError:
         return None
+    # Conversión BGR->RGB sin cv2 (numpy puro) para no depender de sysdeps.
+    # img_bgr viene de PIL (RGB->BGR manual) o de cv2.imdecode; en ambos casos es ndarray HxWx3.
     try:
-        import cv2
-    except ImportError:
+        import numpy as np
+        rgb = img_bgr[:, :, ::-1]
+        if not rgb.flags["C_CONTIGUOUS"]:
+            rgb = np.ascontiguousarray(rgb)
+    except Exception:
         return None
-    rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     with mp.solutions.face_mesh.FaceMesh(
         static_image_mode=True, max_num_faces=1, refine_landmarks=True,
         min_detection_confidence=0.5) as fm:
