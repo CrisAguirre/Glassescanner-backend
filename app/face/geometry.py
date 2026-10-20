@@ -26,16 +26,24 @@ def symmetry_index(pairs, width):
 
 
 def classify_face(largo, ancho, frente, pomulo, mandibula):
-    """Clasificación facial morfométrica calibrada (7 formas clásicas).
+    """Clasificación facial morfométrica (7 formas clásicas).
+
+    IMPORTANTE (2026-10-20): los ratios 2D no separan con fiabilidad las 7
+    clases en todos los rostros; esta versión reduce los sesgos históricos
+    (cuadrado/diamante) y es PROVISIONAL hasta tener etiquetas de óptico.
+    El frontend permite corregir la forma manualmente y esa corrección se
+    registra en /feedback para recalibrar en la siguiente iteración.
+
     largo: altura facial (trichion a menton)
-    ancho: ancho bizigomático / temporal
-    frente: anchura a nivel de frente/sienes superiores
-    pomulo: anchura máxima pómulos
-    mandibula: anchura gonial de mandíbula
+    ancho: ancho temporal (sien a sien)
+    frente: anchura a nivel de cejas/frente
+    pomulo: anchura bizigomática (pómulos)
+    mandibula: anchura gonial (mandíbula)
     """
     ratio_la = largo / max(ancho, 1e-6)
-    r_mand_pom = mandibula / max(pomulo, 1e-6)
+    r_frente_pom = frente / max(pomulo, 1e-6)
     r_mand_frente = mandibula / max(frente, 1e-6)
+    r_mand_pom = mandibula / max(pomulo, 1e-6)
 
     # 1. Rostro marcadamente alargado
     if ratio_la > 1.45:
@@ -43,21 +51,21 @@ def classify_face(largo, ancho, frente, pomulo, mandibula):
 
     # 2. Rostros anchos / cortos (largo similar a ancho)
     if ratio_la < 1.18:
-        # Si la mandíbula es angular y ancha comparada con pómulos o frente -> cuadrado
-        if r_mand_pom > 0.88 or r_mand_frente > 0.92:
+        # Mandíbula ancha y angular respecto a pómulos/frente -> cuadrado
+        if r_mand_pom > 0.90 or r_mand_frente > 0.95:
             return "cuadrado"
         return "redondo"
 
-    # 3. Base ancha: mandíbula notablemente más ancha que frente
-    if mandibula > frente * 1.08:
+    # 3. Base ancha: mandíbula claramente más ancha que la frente
+    if r_mand_frente > 1.15:
         return "triangular"
 
-    # 4. Corazón / Triángulo invertido: frente amplia y barbilla afilada
-    if frente > mandibula * 1.18 and frente >= pomulo * 0.94:
+    # 4. Corazón: frente amplia y mandíbula estrecha
+    if r_mand_frente < 0.91 and r_frente_pom >= 0.88:
         return "corazon"
 
-    # 5. Diamante: pómulos son claramente la parte más ancha; frente y mandíbula estrechas
-    if pomulo > frente * 1.12 and pomulo > mandibula * 1.12:
+    # 5. Diamante: pómulos dominan claramente frente y mandíbula
+    if r_frente_pom < 0.80 and r_mand_pom < 0.80:
         return "diamante"
 
     # 6. Oval: proporciones armónicas y equilibradas
@@ -103,8 +111,73 @@ def metrics_from_box(box, img_w, img_h):
     }
 
 
+def metrics_from_landmarks(lm, img_w, img_h):
+    """Calcula métricas desde landmarks normalizados (0-1) en píxeles.
+
+    Los landmarks de MediaPipe vienen normalizados por eje (x/w, y/h). Si se
+    calculan distancias directamente sobre ellos, un rostro en una foto vertical
+    parece "cuadrado" y en una horizontal "oblongo": la forma detectada termina
+    dependiendo del aspecto de la imagen. Por eso P() devuelve píxeles.
+    """
+
+    def P(i):
+        p = lm[i]
+        if hasattr(p, "x"):
+            return (p.x * img_w, p.y * img_h)
+        return (p[0] * img_w, p[1] * img_h)
+
+    x_mid = P(168)[0]
+    W = _dist(P(234), P(454)) or 1e-6  # ancho temporal en px
+    pairs = [
+        (P(33), P(263), x_mid),
+        (P(133), P(362), x_mid),
+        (P(93), P(323), x_mid),
+        (P(61), P(291), x_mid),
+    ]
+    sym = symmetry_index([(a, b, m) for a, b, m in pairs], W)
+    largo = _dist(P(10), P(152))
+    frente = _dist(P(103), P(332)) if len(lm) > 334 else W * 0.90
+    pom = _dist(P(123), P(352)) if len(lm) > 352 else W
+    man = _dist(P(172), P(397)) if len(lm) > 397 else pom * 0.85
+    shape = classify_face(largo, W, frente, pom, man)
+
+    # Medición de IPD
+    if len(lm) > 473:
+        ipd_px = _dist(P(468), P(473))
+    else:
+        ipd_px = _dist(P(33), P(263)) * 0.5
+
+    px2mm = 63.0 / ipd_px if ipd_px > 15 else (142.0 / max(W, 1.0))
+
+    temporal_est = round(max(122.0, min(156.0, W * px2mm)), 1)
+    ipd_mm_est = round(max(58.0, min(72.0, 63.0 * (temporal_est / 138.0))), 1)
+
+    # Puente nasal (cantos internos 133 a 362)
+    canthi_px = _dist(P(133), P(362))
+    bridge_mm = round(max(15.0, min(22.0, canthi_px * px2mm * 0.52)), 1)
+
+    # Cejas vs Ojos
+    y_brow = (P(105)[1] + P(334)[1]) / 2.0
+    y_eye = (P(468)[1] + P(473)[1]) / 2.0 if len(lm) > 473 else P(168)[1]
+    brow_clearance_mm = max(0.0, (y_eye - y_brow) * px2mm)
+    eyebrow_in_zone = 8.0 <= brow_clearance_mm <= 26.0
+
+    return {
+        "face_shape": shape,
+        "symmetry_index": sym,
+        "largo_ancho": round(largo / max(W, 1e-6), 2),
+        "frente_pomulo": round(frente / max(pom, 1e-6), 2),
+        "mandibula_frente": round(man / max(frente, 1e-6), 2),
+        "temporal_est": temporal_est,
+        "ipd_mm_est": ipd_mm_est,
+        "nose_bridge_mm_est": bridge_mm,
+        "eyebrow_in_frame_zone": eyebrow_in_zone,
+        "warnings": [],
+    }
+
+
 def try_mediapipe_landmarks(img_bgr):
-    """Retorna dict de puntos nombrados o None si no hay MediaPipe/rostro."""
+    """Retorna dict de métricas o None si no hay MediaPipe/rostro."""
     try:
         import mediapipe as mp
     except ImportError:
@@ -129,57 +202,6 @@ def try_mediapipe_landmarks(img_bgr):
     if not res.multi_face_landmarks:
         return None
     lm = res.multi_face_landmarks[0].landmark
-
-    def P(i):
-        return (lm[i].x, lm[i].y)
-
-    x_mid = P(168)[0]
     h, w = img_bgr.shape[:2]
-    W = _dist(P(234), P(454)) or 1e-6
-    pairs = [
-        (P(33), P(263), x_mid),
-        (P(133), P(362), x_mid),
-        (P(93), P(323), x_mid),
-        (P(61), P(291), x_mid),
-    ]
-    sym = symmetry_index([(a, b, m) for a, b, m in pairs], W)
-    largo = _dist(P(10), P(152))
-    ancho = W
-    frente = _dist(P(103), P(332)) if len(lm) > 332 else W * 0.90
-    pom = _dist(P(123), P(352)) if len(lm) > 352 else W
-    man = _dist(P(172), P(397)) if len(lm) > 397 else pom * 0.85
-    shape = classify_face(largo, ancho, frente, pom, man)
 
-    # Medición de IPD
-    if len(lm) > 473:
-        ipd_px = _dist(P(468), P(473)) * w
-    else:
-        ipd_px = _dist(P(33), P(263)) * w * 0.5
-
-    px2mm = 63.0 / ipd_px if ipd_px > 15 else (142.0 / max(W * w, 1))
-
-    temporal_est = round(max(122.0, min(156.0, W * w * px2mm)), 1)
-    ipd_mm_est = round(max(58.0, min(72.0, 63.0 * (temporal_est / 138.0))), 1)
-
-    # Puente nasal (cantos internos 133 a 362)
-    canthi_px = _dist(P(133), P(362)) * w
-    bridge_mm = round(max(15.0, min(22.0, canthi_px * px2mm * 0.52)), 1)
-
-    # Cejas vs Ojos
-    y_brow = (P(105)[1] + P(334)[1]) / 2.0 * h
-    y_eye = (P(168)[1] if len(lm) <= 473 else (P(468)[1] + P(473)[1]) / 2.0) * h
-    brow_clearance_mm = max(0.0, (y_eye - y_brow) * px2mm)
-    eyebrow_in_zone = 8.0 <= brow_clearance_mm <= 26.0
-
-    return {
-        "face_shape": shape,
-        "symmetry_index": sym,
-        "largo_ancho": round(largo / max(ancho, 1e-6), 2),
-        "frente_pomulo": round(frente / max(pom, 1e-6), 2),
-        "mandibula_frente": round(man / max(frente, 1e-6), 2),
-        "temporal_est": temporal_est,
-        "ipd_mm_est": ipd_mm_est,
-        "nose_bridge_mm_est": bridge_mm,
-        "eyebrow_in_frame_zone": eyebrow_in_zone,
-        "warnings": [],
-    }
+    return metrics_from_landmarks(lm, w, h)

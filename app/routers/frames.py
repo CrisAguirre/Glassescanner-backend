@@ -87,7 +87,10 @@ async def delete_frame(fid: str):
 async def recommend(req: RecommendRequest):
     pool = await _db_frames(req.optica_id) or _mem_frames(req.optica_id)
     targets = [f for f in pool if not req.frame_ids or f.id in req.frame_ids]
-    return [score_frame(req.metrics, f) for f in targets]
+    recs = [score_frame(req.metrics, f) for f in targets]
+    # Orden estable: score desc, id asc. Evita que el top-1 dependa del orden
+    # del catálogo cuando hay empates.
+    return sorted(recs, key=lambda r: (-r.score, r.frame_id))
 
 
 @router.post("/frames/seed", dependencies=[Depends(require_admin)])
