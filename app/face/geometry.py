@@ -1,12 +1,45 @@
 """Geometría facial S2.
 - Funciones puras (testeables sin MediaPipe): simetría, ratios, clasificación.
+- Clasificación: ML (joblib) como primario, reglas como fallback.
 - Detección: MediaPipe FaceMesh si está instalado (Render: Python 3.11 sí),
   si no OpenCV Haar como fallback (dev local en Python 3.14 sin wheel de MediaPipe).
 Índices MediaPipe FaceMesh (468): ojos 33/133/263/362, nariz 1/168, mentón 152,
 frente 10, sienes 234/454, pómulos 93/323.
 """
 
+import logging
 import math
+import os
+
+logger = logging.getLogger(__name__)
+
+# ── ML classifier (loaded once at module level) ──
+_ML_MODEL = None
+_ML_FEATURES = ["largo_ancho", "frente_pomulo", "mandibula_frente", "symmetry_index"]
+
+
+def _load_ml_model():
+    """Intenta cargar el modelo ML de forma facial. Retorna pipeline o None."""
+    model_path = os.path.join(
+        os.path.dirname(__file__), "..", "models", "face_classifier.joblib"
+    )
+    if not os.path.exists(model_path):
+        return None
+    try:
+        import joblib
+
+        model = joblib.load(model_path)
+        logger.info("ML face classifier loaded from %s", model_path)
+        return model
+    except Exception as e:
+        logger.warning("Could not load ML face classifier: %s", e)
+        return None
+
+
+try:
+    _ML_MODEL = _load_ml_model()
+except Exception:
+    _ML_MODEL = None
 
 
 def _dist(a, b):
@@ -70,6 +103,34 @@ def classify_face(largo, ancho, frente, pomulo, mandibula):
 
     # 6. Oval: proporciones armónicas y equilibradas
     return "oval"
+
+
+def classify_face_ml(largo_ancho, frente_pomulo, mandibula_frente, symmetry_index, fallback="oval"):
+    """Clasificación facial con modelo ML (scikit-learn).
+
+    Usa el pipeline cargado al iniciar el módulo (_ML_MODEL). Si el modelo no
+    está disponible o falla, retorna `fallback` (clasificación por reglas).
+
+    Args:
+        largo_ancho: ratio largo / ancho facial
+        frente_pomulo: ratio frente / pómulo
+        mandibula_frente: ratio mandíbula / frente
+        symmetry_index: índice de simetría (0-100)
+        fallback: forma a retornar si el modelo ML no está disponible
+    """
+    if _ML_MODEL is None:
+        return fallback
+    try:
+        import numpy as np
+
+        X = np.array([[largo_ancho, frente_pomulo, mandibula_frente, symmetry_index]])
+        prediction = _ML_MODEL.predict(X)[0]
+        # Asegurar que la predicción es un string válido
+        valid = {"oval", "redondo", "cuadrado", "corazon", "diamante", "oblongo", "triangular"}
+        return str(prediction) if str(prediction) in valid else fallback
+    except Exception as e:
+        logger.warning("ML classify_face failed, using rules fallback: %s", e)
+        return fallback
 
 
 def detect_face_box_bgr(img_bgr):
@@ -140,6 +201,15 @@ def metrics_from_landmarks(lm, img_w, img_h):
     pom = _dist(P(123), P(352)) if len(lm) > 352 else W
     man = _dist(P(172), P(397)) if len(lm) > 397 else pom * 0.85
     shape = classify_face(largo, W, frente, pom, man)
+
+    # Intentar ML si el modelo está disponible (override reglas)
+    shape = classify_face_ml(
+        largo / max(W, 1e-6),
+        frente / max(pom, 1e-6),
+        man / max(frente, 1e-6),
+        sym,
+        fallback=shape,
+    )
 
     # Medición de IPD
     if len(lm) > 473:
