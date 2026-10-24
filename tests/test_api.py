@@ -1,7 +1,19 @@
+import os
+
+os.environ["ENVIRONMENT"] = "test"
+os.environ["ADMIN_KEY"] = "test-admin-key-123456"
+os.environ["MONGODB_URI"] = ""
+os.environ["CORS_ORIGINS"] = (
+    "http://localhost:5173,https://glassescanner.vercel.app"
+)
+os.environ["RATE_LIMIT_PER_MINUTE"] = "1000"
+os.environ.pop("RENDER", None)
+
 from fastapi.testclient import TestClient
 from app.main import app
 
 c = TestClient(app)
+ADMIN = {"X-Admin-Key": os.environ["ADMIN_KEY"]}
 
 
 def test_health():
@@ -145,6 +157,28 @@ def test_analyze_rejects_bad_type():
     assert r.status_code == 400
 
 
+def test_analyze_rejects_oversized(monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "MAX_PHOTO_MB", 0.001)
+    r = c.post(
+        "/analyze",
+        files={"photo": ("big.jpg", b"x" * 4096, "image/jpeg")},
+    )
+    assert r.status_code == 413
+
+
+def test_cors_allows_configured_origin():
+    origin = "https://glassescanner.vercel.app"
+    r = c.get("/health", headers={"Origin": origin})
+    assert r.headers.get("access-control-allow-origin") == origin
+
+
+def test_cors_rejects_unknown_origin():
+    r = c.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in r.headers
+
+
 def test_analyze_no_face_blank():
     import numpy as np
 
@@ -163,7 +197,7 @@ def test_delete_photo():
 
 
 def test_crud_frames():
-    H = {"X-Admin-Key": "cambia-esta-clave"}
+    H = ADMIN
     f = {
         "id": "FT99",
         "nombre": "Test",
