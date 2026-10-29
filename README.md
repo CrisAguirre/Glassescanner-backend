@@ -23,3 +23,6 @@ STORE_PHOTOS=false
 ADMIN_KEY=<clave larga y aleatoria de al menos 16 caracteres>
 ```
 `ADMIN_KEY` protege las mutaciones del catálogo con `X-Admin-Key`. Si queda vacía o usa un placeholder, el CRUD se deshabilita; en `ENVIRONMENT=production` (o al detectar `RENDER=true`) el arranque falla para evitar desplegar sin clave.
+
+## Rate limit y proxy
+El límite por IP usa `request.client.host`; la app **no** lee `X-Forwarded-For` por su cuenta para que un cliente no pueda elegir su cupo. Detrás de Render, el contenedor arranca con `--proxy-headers --forwarded-allow-ips=*` (ver `Dockerfile`) y uvicorn reescribe la IP desde el header solo en ese escenario. Si expones el contenedor directamente a internet, quita `--forwarded-allow-ips=*`.

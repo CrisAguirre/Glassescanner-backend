@@ -101,7 +101,15 @@ def test_metrics_aspect_invariant():
     # With ML classifier the shape may differ from the old rules-based "oblongo";
     # the critical invariant is that both aspect ratios yield the SAME shape.
     assert a["face_shape"] == b["face_shape"]
-    assert a["face_shape"] in ("oval", "redondo", "cuadrado", "corazon", "diamante", "oblongo", "triangular")
+    assert a["face_shape"] in (
+        "oval",
+        "redondo",
+        "cuadrado",
+        "corazon",
+        "diamante",
+        "oblongo",
+        "triangular",
+    )
 
 
 def test_recommend_sorted():

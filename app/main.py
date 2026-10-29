@@ -14,6 +14,17 @@ from .routers import analyze, frames, feedback
 logger = logging.getLogger("glassescanner")
 
 
+def client_ip(request: Request) -> str:
+    """IP del cliente para el rate limit.
+
+    No se lee `X-Forwarded-For` aquí a propósito: un cliente podría rotarlo y
+    obtener un cupo nuevo por minuto. Uvicorn reescribe `request.client` desde
+    ese header solo cuando el peer es un proxy de confianza
+    (`--proxy-headers --forwarded-allow-ips=...`), que es el caso de Render.
+    """
+    return request.client.host if request.client else "unknown"
+
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Límite básico por IP y ruta, en memoria y por proceso.
 
@@ -30,10 +41,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if self.limit <= 0 or request.method == "OPTIONS" or request.url.path == "/health":
             return await call_next(request)
 
-        forwarded = request.headers.get("x-forwarded-for", "")
-        ip = forwarded.split(",")[0].strip() or (
-            request.client.host if request.client else "unknown"
-        )
+        ip = client_ip(request)
         window = int(time.time() // 60)
         key = f"{ip}:{request.url.path}"
         count, stored_window = self.hits.get(key, (0, window))
