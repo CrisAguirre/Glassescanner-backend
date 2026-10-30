@@ -141,8 +141,12 @@ def detect_face_box_bgr(img_bgr):
         return None
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     try:
+        # cv2.data no está en los stubs de opencv; getattr evita el falso positivo.
+        data = getattr(cv2, "data", None)
+        if data is None:
+            return None
         clf = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+            data.haarcascades + "haarcascade_frontalface_default.xml"
         )
         faces = clf.detectMultiScale(gray, 1.15, 4, minSize=(90, 90))
     except Exception:
@@ -154,7 +158,7 @@ def detect_face_box_bgr(img_bgr):
 
 def metrics_from_box(box, img_w, img_h):
     """Estimación gruesa desde bounding box (fallback). S2-real usa malla en Render."""
-    _x, _y, w, h = [float(v) for v in box]
+    _x, _y, w, h = (float(v) for v in box)
     shape = classify_face(h, w, w * 0.92, w, w * 0.86)
     return {
         "face_shape": shape,
@@ -195,7 +199,7 @@ def metrics_from_landmarks(lm, img_w, img_h):
         (P(93), P(323), x_mid),
         (P(61), P(291), x_mid),
     ]
-    sym = symmetry_index([(a, b, m) for a, b, m in pairs], W)
+    sym = symmetry_index(list(pairs), W)
     largo = _dist(P(10), P(152))
     frente = _dist(P(103), P(332)) if len(lm) > 334 else W * 0.90
     pom = _dist(P(123), P(352)) if len(lm) > 352 else W
@@ -212,10 +216,11 @@ def metrics_from_landmarks(lm, img_w, img_h):
     )
 
     # Medición de IPD
-    if len(lm) > 473:
-        ipd_px = _dist(P(468), P(473))
-    else:
-        ipd_px = _dist(P(33), P(263)) * 0.5
+    ipd_px = (
+        _dist(P(468), P(473))
+        if len(lm) > 473
+        else _dist(P(33), P(263)) * 0.5
+    )
 
     px2mm = 63.0 / ipd_px if ipd_px > 15 else (142.0 / max(W, 1.0))
 

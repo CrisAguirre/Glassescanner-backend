@@ -1,9 +1,12 @@
+import logging
 from collections import Counter, defaultdict
 
 from fastapi import APIRouter
 
 from ..db import get_db
 from ..schemas import FeedbackIn
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 MEM: list[dict] = []  # fallback sin Mongo
@@ -18,7 +21,8 @@ async def save_feedback(fb: FeedbackIn):
         try:
             await db["feedback"].insert_one(doc)
         except Exception:
-            pass
+            # Se conserva el feedback en memoria; perder el voto sin rastro sí duele.
+            logger.warning("No se pudo guardar feedback en Mongo; queda en memoria", exc_info=True)
     return {"ok": True}
 
 
@@ -30,7 +34,7 @@ async def feedback_stats():
         try:
             docs = await db["feedback"].find({}, {"_id": 0}).to_list(1000) or docs
         except Exception:
-            pass
+            logger.warning("Mongo no respondió en /feedback/stats; se usa memoria", exc_info=True)
     n = len(docs)
     if not n:
         return {

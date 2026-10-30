@@ -10,6 +10,7 @@ os.environ["RATE_LIMIT_PER_MINUTE"] = "1000"
 os.environ.pop("RENDER", None)
 
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 c = TestClient(app)
@@ -46,7 +47,7 @@ def test_recommend_scores_range():
 
 
 def test_geometry_pure():
-    from app.face.geometry import symmetry_index, classify_face
+    from app.face.geometry import classify_face, symmetry_index
 
     s = symmetry_index([((0.3, 0.5), (0.7, 0.5), 0.5)], 0.4)
     assert 90 <= s <= 100
@@ -136,13 +137,13 @@ def test_scoring_rules():
         nose_bridge_mm_est=18,
         eyebrow_in_frame_zone=True,
     )
-    base = dict(
-        nombre="Test",
-        B_mm=35,
-        D_mm=18,
-        ancho_total_mm=140,
-        A_mm=50,
-    )
+    base = {
+        "nombre": "Test",
+        "B_mm": 35,
+        "D_mm": 18,
+        "ancho_total_mm": 140,
+        "A_mm": 50,
+    }
     perfect = Frame(id="TP1", forma="redondo", **base)
     avoid = Frame(id="TP2", forma="cuadrado", **base)
     bad = Frame(

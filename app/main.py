@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .config import WEAK_ADMIN_KEYS, settings
-from .routers import analyze, frames, feedback
+from .routers import analyze, feedback, frames
 
 logger = logging.getLogger("glassescanner")
 

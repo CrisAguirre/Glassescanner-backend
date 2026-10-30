@@ -1,9 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends
-from ..schemas import Frame, RecommendRequest, Recommendation
-from ..expert.rules import score_frame
-from ..expert.catalog import FRAMES
-from ..db import get_db
+import json
+import logging
+import pathlib
+
+from fastapi import APIRouter, Depends, HTTPException
+
 from ..auth import require_admin
+from ..db import get_db
+from ..expert.catalog import FRAMES
+from ..expert.rules import score_frame
+from ..schemas import Frame, Recommendation, RecommendRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -18,6 +25,7 @@ async def _db_frames(optica_id: str | None = None):
         docs = await db["frames"].find(q, {"_id": 0}).to_list(200)
         return [Frame(**d) for d in docs] or None
     except Exception:
+        logger.warning("Mongo no respondió al listar frames; se usa el seed", exc_info=True)
         return None
 
 
@@ -45,7 +53,7 @@ async def create_frame(f: Frame):
         try:
             await db["frames"].insert_one(f.model_dump())
         except Exception:
-            pass
+            logger.warning("Frame %s creado solo en memoria (Mongo falló)", f.id, exc_info=True)
     return f
 
 
@@ -63,7 +71,9 @@ async def update_frame(fid: str, f: Frame):
                         {"id": fid}, f.model_dump(), upsert=True
                     )
                 except Exception:
-                    pass
+                    logger.warning(
+                        "Frame %s actualizado solo en memoria (Mongo falló)", fid, exc_info=True
+                    )
             return f
     raise HTTPException(404, f"Frame {fid} no existe")
 
@@ -79,7 +89,7 @@ async def delete_frame(fid: str):
         try:
             await db["frames"].delete_one({"id": fid})
         except Exception:
-            pass
+            logger.warning("Frame %s borrado solo en memoria (Mongo falló)", fid, exc_info=True)
     return {"ok": True, "id": fid}
 
 
@@ -96,9 +106,6 @@ async def recommend(req: RecommendRequest):
 @router.post("/frames/seed", dependencies=[Depends(require_admin)])
 async def seed_frames():
     """Carga frames_seed.json a Mongo (requiere MONGODB_URI)."""
-    import json
-    import pathlib
-
     db = get_db()
     if db is None:
         return {"ok": False, "msg": "Sin MONGODB_URI"}

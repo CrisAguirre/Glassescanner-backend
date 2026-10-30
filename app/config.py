@@ -1,7 +1,6 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 # Claves que nunca deben usarse en producción. Si ADMIN_KEY queda vacía o
 # coincide con un placeholder, el CRUD de monturas se deshabilita.
 WEAK_ADMIN_KEYS = {"", "cambia-esta-clave", "cambia-esta-clave-en-produccion"}

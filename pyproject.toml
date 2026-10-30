@@ -5,7 +5,10 @@ exclude = [".venv", "__pycache__"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "S", "ASYNC", "C4", "PIE"]
-ignore = ["S101"]  # asserts permitidos en tests
+ignore = [
+    "S101",  # asserts permitidos en tests
+    "B008",  # FastAPI pide File(...)/Header(...) en los defaults de los endpoints
+]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S105", "S106"]
@@ -15,6 +18,8 @@ python_version = "3.12"
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 warn_unused_configs = true
+check_untyped_defs = true
 
 [tool.pytest.ini_options]
 addopts = "-q"
+testpaths = ["tests"]

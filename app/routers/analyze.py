@@ -6,12 +6,12 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image, ImageOps
 
 from ..config import settings
-from ..schemas import FaceMetrics, Ratios
 from ..face.geometry import (
     detect_face_box_bgr,
     metrics_from_box,
     try_mediapipe_landmarks,
 )
+from ..schemas import FaceMetrics, Ratios
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -59,15 +59,18 @@ def analyze(photo: UploadFile = File(...)):
     img = None
     # 1) PIL primero (puro Python+numpy, no depende de cv2 ni de libs del sistema)
     try:
-        pil_img = Image.open(io.BytesIO(data))
-        if pil_img.width * pil_img.height > MAX_IMAGE_PIXELS:
-            raise HTTPException(
-                413,
-                "La imagen tiene demasiados píxeles. Reduce su resolución.",
-            )
-        # Respetar la orientación EXIF de fotos tomadas con el móvil.
-        pil_img = ImageOps.exif_transpose(pil_img).convert("RGB")
-        img = np.array(pil_img)[:, :, ::-1].copy()  # RGB->BGR sin cv2
+        with Image.open(io.BytesIO(data)) as src:
+            if src.width * src.height > MAX_IMAGE_PIXELS:
+                raise HTTPException(
+                    413,
+                    "La imagen tiene demasiados píxeles. Reduce su resolución.",
+                )
+            # Respetar la orientación EXIF de fotos tomadas con el móvil.
+            upright = ImageOps.exif_transpose(src)
+            if upright is None:
+                raise HTTPException(400, "No se pudo orientar la imagen")
+            rgb = upright.convert("RGB")
+            img = np.array(rgb)[:, :, ::-1].copy()  # RGB->BGR sin cv2
     except HTTPException:
         raise
     except Image.DecompressionBombError as exc:
@@ -76,6 +79,8 @@ def analyze(photo: UploadFile = File(...)):
             "La imagen tiene demasiados píxeles. Reduce su resolución.",
         ) from exc
     except Exception:
+        # PIL no pudo abrirla (p. ej. HEIC); se intenta cv2 antes de rendirse.
+        logger.debug("PIL no pudo decodificar la imagen; se intenta cv2", exc_info=True)
         img = None
 
     # 2) cv2.imdecode como respaldo
